@@ -28,6 +28,17 @@ app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
+    """
+    Retrieve all blog posts, optionally sorted.
+
+    Query Parameters:
+        sort (str): Field to sort by ('title' or 'content'), optional.
+        direction (str): Sort order ('asc' or 'desc'), optional.
+
+    Returns:
+        JSON array of posts, sorted if parameters provided.
+        400 error if invalid sort field or direction is passed.
+    """
     sort_field = request.args.get('sort')
     direction = request.args.get('direction', 'asc')
 
@@ -49,6 +60,17 @@ def get_posts():
 
 @app.route('/api/posts', methods=['POST'])
 def add_post():
+    """
+    Create a new blog post.
+
+    Request Body (JSON):
+        title (str): Title of the new post (required).
+        content (str): Content of the new post (required).
+
+    Returns:
+        JSON object of the created post with a new unique id and 201 status code.
+        400 error if required fields are missing.
+    """
     data = request.get_json()
     if not data:
         return jsonify({"error": "Missing JSON body"}), 400
@@ -74,6 +96,16 @@ def add_post():
 
 @app.route('/api/posts/<int:post_id>', methods=['DELETE'])
 def delete_post(post_id):
+    """
+    Delete a blog post by its unique id.
+
+    Path Parameters:
+        post_id (int): ID of the post to delete.
+
+    Returns:
+        JSON message confirming deletion and 200 status code.
+        404 error if the post does not exist.
+    """
     global POSTS
     post_to_delete = next((post for post in POSTS if post['id'] == post_id), None)
     if post_to_delete is None:
@@ -84,6 +116,20 @@ def delete_post(post_id):
 
 @app.route('/api/posts/<int:post_id>', methods=['PUT'])
 def update_post(post_id):
+    """
+    Update the title and/or content of an existing blog post.
+
+    Path Parameters:
+        post_id (int): ID of the post to update.
+
+    Request Body (JSON):
+        title (str): New title for the post (optional).
+        content (str): New content for the post (optional).
+
+    Returns:
+        JSON object of the updated post and 200 status code.
+        404 error if the post does not exist.
+    """
     data = request.get_json()
     if not data:
         return jsonify({"error": "Missing JSON body"}), 400
@@ -100,6 +146,16 @@ def update_post(post_id):
 
 @app.route('/api/posts/search', methods=['GET'])
 def search_posts():
+    """
+    Search for posts matching title or content query parameters.
+
+    Query Parameters:
+        title (str): Substring to search in post titles (optional).
+        content (str): Substring to search in post contents (optional).
+
+    Returns:
+        JSON array of posts matching the criteria (may be empty).
+    """
     title_query = request.args.get('title', '').lower()
     content_query = request.args.get('content', '').lower()
 
